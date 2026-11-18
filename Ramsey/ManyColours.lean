@@ -74,12 +74,12 @@ theorem not_cliqueFree_of_pullback {C : TopEdgeLabeling V K} {f : V' ↪ V} {i :
   exact hC (t.map f) (ht.map.mono (labelGraph_pullback_map_le C f i))
 
 /-- The colouring `C` has, for some colour `i`, a monochromatic `K_{s i}` in colour `i`. -/
-def HasMonoClique (C : TopEdgeLabeling V (Fin k)) (s : Fin k → ℕ) : Prop :=
+@[expose] def HasMonoClique (C : TopEdgeLabeling V (Fin k)) (s : Fin k → ℕ) : Prop :=
   ∃ i, ¬(C.labelGraph i).CliqueFree (s i)
 
 /-- `Arrows n s`: every colouring of the edges of the complete graph on `Fin n` with colours
 `Fin k` has, for some `i`, a monochromatic `K_{s i}` in colour `i`. -/
-def Arrows (n : ℕ) (s : Fin k → ℕ) : Prop :=
+@[expose] def Arrows (n : ℕ) (s : Fin k → ℕ) : Prop :=
   ∀ C : TopEdgeLabeling (Fin n) (Fin k), HasMonoClique C s
 
 /-- If `Arrows n s`, then every colouring of the edges of the complete graph on a vertex type
