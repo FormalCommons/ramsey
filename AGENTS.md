@@ -4,7 +4,8 @@ This repository formalizes, in Lean 4, the plan that [README.md](README.md)
 links to. It builds on Mathlib, and on the other libraries that
 `lakefile.toml` requires, at the versions pinned in `lake-manifest.json`.
 Read the plan's pages for the statements, the sources and the routes to a
-proof.
+proof, and follow the conventions on its front page, which keep the
+milestones independent of each other.
 
 ## Building
 
@@ -18,10 +19,10 @@ build. Before you push, `lake build --wfail` must succeed.
 
 ## Layout
 
-- The library is under `Project/`, in the namespace `Project`. Use one file
+- The library is under `Ramsey/`, in the namespace `Ramsey`. Use one file
   per topic.
 - No file imports the whole library. `lake build` builds every file under
-  `Project/` by itself (the `globs` in `lakefile.toml`), so a new file needs
+  `Ramsey/` by itself (the `globs` in `lakefile.toml`), so a new file needs
   no import anywhere else. Do not add a file that imports the others.
 
 ## Lean's module system
@@ -32,7 +33,7 @@ Every file is a module, and starts like this:
 module
 
 public import Mathlib.Algebra.Group.Defs
-public import Project.Basic
+public import Ramsey.Basic
 
 /-!
 # Title
@@ -42,11 +43,11 @@ What the file contains: its main definitions and results, and its sources.
 
 public section
 
-namespace Project
+namespace Ramsey
 
 …
 
-end Project
+end Ramsey
 
 end
 ```
@@ -79,6 +80,10 @@ end
   `lake-manifest.json`, `lean-toolchain` or anything under `.github/`,
   unless the issue you work on asks for it and a person in the project
   opened it.
+- **Proofs check quickly.** A declaration that takes more than a few seconds
+  to check slows every build that follows. Prefer an argument to a search:
+  use symmetry to make finite checks small, and split `decide` into small
+  cases rather than running it on a large one.
 - **Keep pull requests focused.** One pull request does one issue. If an issue
   is too big for a pull request of a few hundred lines, split it into smaller
   issues instead.
@@ -89,9 +94,9 @@ Besides building, check each main theorem of the pull request with
 `#print axioms`, in a scratch file that you do not commit:
 
 ```lean
-import Project.Foo
+import Ramsey.Foo
 
-#print axioms Project.foo_bar
+#print axioms Ramsey.foo_bar
 ```
 
 Run it with `lake env lean Scratch.lean`. A theorem may depend only on
