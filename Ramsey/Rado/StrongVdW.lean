@@ -57,9 +57,11 @@ private lemma exists_hasConfig_of_finset {κ : Type*} [Finite κ] (l s : ℕ) (h
     (S : Finset κ) :
     ∃ N : ℕ, ∀ C : ℕ → κ, (∀ x ∈ Finset.Icc 1 N, C x ∈ S) → HasConfig l s N C := by
   classical
-  induction S using Finset.strongInduction with | H S ih => ?_
-  have h : ∀ c ∈ S, ∃ N : ℕ, ∀ C : ℕ → κ, (∀ x ∈ Finset.Icc 1 N, C x ∈ S.erase c) →
-      HasConfig l s N C := fun c hc ↦ ih _ (Finset.erase_ssubset hc)
+  induction S using Finset.strongInduction with
+  | H S ih => ?_
+  have h : ∀ c ∈ S, ∃ N : ℕ,
+      ∀ C : ℕ → κ, (∀ x ∈ Finset.Icc 1 N, C x ∈ S.erase c) → HasConfig l s N C :=
+    fun c hc ↦ ih _ (Finset.erase_ssubset hc)
   choose! M hM using h
   set n := S.sup M
   obtain ⟨W, hW⟩ := exists_mono_arithProg_of_finite (l * n + 2) κ
