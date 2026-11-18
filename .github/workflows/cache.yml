@@ -1,0 +1,45 @@
+name: cache
+
+# Builds the dependencies, Mathlib and anything else that lake-manifest.json
+# names, and saves them for CI to restore. It runs only on main, whose code is
+# merged, so no pull request can put anything in the cache. GitHub lets runs
+# on any branch restore main's caches.
+on:
+  push:
+    branches: [main]
+    paths: [lean-toolchain, lake-manifest.json, .github/workflows/cache.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - name: install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/v4.2.4/elan-init.sh \
+            | sh -s -- -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: look for a saved cache
+        id: look
+        uses: actions/cache/restore@v6
+        with:
+          path: .lake/packages
+          key: lake-packages-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+          lookup-only: true
+      - name: fetch Mathlib's build cache
+        if: steps.look.outputs.cache-hit != 'true'
+        run: lake exe cache get
+      - name: build
+        if: steps.look.outputs.cache-hit != 'true'
+        run: lake build
+      - name: save the built dependencies
+        if: steps.look.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: .lake/packages
+          key: lake-packages-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}

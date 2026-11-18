@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  pull_request:
+  merge_group:
+
+# CI runs the build scripts of every pull request's branch, so it gets no
+# secrets and only read access. It restores the dependencies that the cache
+# workflow built on main, but never saves a cache itself.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - name: install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/v4.2.4/elan-init.sh \
+            | sh -s -- -y --no-modify-path --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: restore the built dependencies
+        id: restore
+        uses: actions/cache/restore@v6
+        with:
+          path: .lake/packages
+          key: lake-packages-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}
+      - name: fetch Mathlib's build cache
+        if: steps.restore.outputs.cache-hit != 'true'
+        run: lake exe cache get
+      # --wfail fails the build on any warning, including a `sorry`.
+      - name: build
+        run: lake build --wfail
